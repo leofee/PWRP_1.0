@@ -1,0 +1,88 @@
+---
+import Layout from "@/layouts/Layout.astro";
+
+const sessionCookie = Astro.cookies.get("session")?.value;
+let session: { username: string } | null = null;
+if (sessionCookie) {
+  try {
+    session = JSON.parse(sessionCookie);
+  } catch {}
+}
+
+if (!session) {
+  return Astro.redirect("/login");
+}
+---
+
+<Layout title="PRWP — Precision Resistance Welding Platform">
+  <link slot="head" rel="stylesheet" href="/css/tokens.css">
+  <link slot="head" rel="stylesheet" href="/css/layout.css">
+  <link slot="head" rel="stylesheet" href="/css/components.css">
+  <link slot="head" rel="stylesheet" href="/css/admin.css">
+  <div id="app">
+    <div class="loading-screen">
+      <div class="loading-content">
+        <div class="loading-icon">⚡</div>
+        <div class="loading-title">PRWP</div>
+        <div class="loading-text">Loading Platform...</div>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline src="/js/data/platform.js"></script>
+  <script is:inline src="/js/data/materials.js"></script>
+  <script is:inline src="/js/data/interfaces.js"></script>
+  <script is:inline src="/js/data/failures.js"></script>
+  <script is:inline src="/js/data/templates.js"></script>
+
+  <script is:inline src="/js/i18n.js"></script>
+  <script is:inline src="/js/router.js"></script>
+  <script is:inline src="/js/store.js"></script>
+  <script is:inline src="/js/ai.js"></script>
+  <script is:inline src="/js/ui.js"></script>
+
+  <script is:inline src="/js/pages/dashboard.js"></script>
+  <script is:inline src="/js/pages/material.js"></script>
+  <script is:inline src="/js/pages/interface.js"></script>
+  <script is:inline src="/js/pages/failure.js"></script>
+  <script is:inline src="/js/pages/process.js"></script>
+  <script is:inline src="/js/pages/knowledge-chain.js"></script>
+  <script is:inline src="/js/pages/placeholder.js"></script>
+  <script is:inline src="/js/pages/admin.js"></script>
+
+  <script is:inline src="/js/app.js"></script>
+</Layout>
+
+<style>
+  .loading-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #6E6E73;
+    font-size: 15px;
+    background: #F5F5F7;
+  }
+
+  .loading-content {
+    text-align: center;
+  }
+
+  .loading-icon {
+    font-size: 36px;
+    margin-bottom: 16px;
+  }
+
+  .loading-title {
+    font-weight: 700;
+    color: #1D1D1F;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+
+  .loading-text {
+    font-size: 15px;
+    color: #6E6E73;
+  }
+</style>

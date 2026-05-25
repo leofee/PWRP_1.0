@@ -1,0 +1,386 @@
+---
+import WeldingIllustration from "@/components/WeldingIllustration.astro";
+
+const sessionCookie = Astro.cookies.get("session")?.value;
+if (sessionCookie) {
+  try {
+    const session = JSON.parse(sessionCookie);
+    if (session?.username) {
+      return Astro.redirect("/");
+    }
+  } catch {}
+}
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PRWP - 精密电阻焊知识库</title>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="illustration-section">
+        <div class="illustration-wrapper">
+          <WeldingIllustration />
+          <div class="illustration-text">
+            <h2>精密电阻焊知识库</h2>
+            <p>数据驱动 · 知识赋能 · 智造未来</p>
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="login-card">
+          <div class="logo-area">
+            <span class="logo-text">PRWP</span>
+          </div>
+          <h1 class="login-title">精密电阻焊知识库</h1>
+          <form class="login-form" method="POST" action="/api/login">
+            <div class="input-group">
+              <input type="text" id="username" name="username" placeholder="用户名" required autocomplete="off" />
+            </div>
+            <div class="input-group">
+              <input type="password" id="password" name="password" placeholder="密码" required minlength="5" />
+              <button type="button" class="eye-btn" id="togglePassword" aria-label="切换密码可见性">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <div class="options-row">
+              <label class="remember-me">
+                <input type="checkbox" id="rememberme" name="rememberme" />
+                <span class="checkmark"></span>
+                记住我
+              </label>
+              <a href="#" class="forgot-link">忘记密码?</a>
+            </div>
+            <button type="submit" class="login-btn">登 录</button>
+            <label class="agreement">
+              <input type="checkbox" id="agree" checked />
+              <span class="checkmark"></span>
+              我已阅读并同意 <a href="#">《服务协议》</a>
+            </label>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <span>Copyright 2024 © PRWP 精密电阻焊知识库 版权所有</span>
+    </div>
+  </body>
+</html>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  }
+
+  .login-container {
+    display: flex;
+    height: 100vh;
+    background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0d1f3c 100%);
+  }
+
+  /* ========== Left: Illustration ========== */
+  .illustration-section {
+    flex: 0 0 58%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .illustration-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .illustration-wrapper :global(.weld-svg) {
+    width: 520px;
+    height: auto;
+    max-width: 85%;
+  }
+
+  .illustration-text {
+    text-align: center;
+    margin-top: 32px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .illustration-text h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: 4px;
+    margin-bottom: 12px;
+  }
+
+  .illustration-text p {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 6px;
+  }
+
+  /* ========== Right: Form ========== */
+  .form-section {
+    flex: 0 0 42%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .form-section::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5%;
+    bottom: 5%;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.1), transparent);
+  }
+
+  .login-card {
+    width: 380px;
+    padding: 48px 40px;
+  }
+
+  .logo-area {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .logo-text {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: 6px;
+    background: linear-gradient(135deg, #40a9ff, #60d0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .login-title {
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+  }
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .input-group {
+    position: relative;
+  }
+
+  .input-group input[type="text"],
+  .input-group input[type="password"] {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.25s, background 0.25s;
+  }
+
+  .input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  .input-group input:focus {
+    border-color: rgba(64, 169, 255, 0.6);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .eye-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+  }
+
+  .eye-btn:hover {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .options-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+  }
+
+  .remember-me, .agreement {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.55);
+    cursor: pointer;
+    font-size: 0.85rem;
+    position: relative;
+    user-select: none;
+  }
+
+  .remember-me input, .agreement input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkmark {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .remember-me input:checked ~ .checkmark,
+  .agreement input:checked ~ .checkmark {
+    border-color: #40a9ff;
+    background: #40a9ff;
+  }
+
+  .remember-me input:checked ~ .checkmark::after,
+  .agreement input:checked ~ .checkmark::after {
+    content: '';
+    width: 4px;
+    height: 8px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-top: -1px;
+  }
+
+  .forgot-link {
+    color: rgba(255, 255, 255, 0.45);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+  }
+
+  .forgot-link:hover {
+    color: #40a9ff;
+  }
+
+  .login-btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #1890ff, #40a9ff);
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+
+  .login-btn:hover {
+    opacity: 0.9;
+  }
+
+  .login-btn:active {
+    transform: scale(0.98);
+  }
+
+  .agreement {
+    justify-content: center;
+    font-size: 0.8rem;
+    margin-top: 4px;
+  }
+
+  .agreement a {
+    color: rgba(64, 169, 255, 0.7);
+    text-decoration: none;
+  }
+
+  .agreement a:hover {
+    color: #40a9ff;
+    text-decoration: underline;
+  }
+
+  /* ========== Footer ========== */
+  .footer {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.25);
+  }
+
+  /* ========== Responsive ========== */
+  @media (max-width: 900px) {
+    .illustration-section {
+      display: none;
+    }
+    .form-section {
+      flex: 1;
+    }
+    .form-section::before {
+      display: none;
+    }
+    .login-card {
+      width: 340px;
+      padding: 32px 24px;
+    }
+  }
+</style>
+
+<script>
+  const toggleBtn = document.getElementById("togglePassword");
+  const pwdInput = document.getElementById("password");
+  if (toggleBtn && pwdInput) {
+    toggleBtn.addEventListener("click", () => {
+      const isPassword = pwdInput.type === "password";
+      pwdInput.type = isPassword ? "text" : "password";
+      toggleBtn.innerHTML = isPassword
+        ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+        : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    });
+  }
+
+
+</script>

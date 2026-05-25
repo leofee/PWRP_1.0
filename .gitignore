@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.DS_Store
+*.log
+pocketbase/pb_data/
+pocketbase/pocketbase.exe
+pocketbase/pocketbase
+python/__pycache__/
+python/.venv/
+python/venv/

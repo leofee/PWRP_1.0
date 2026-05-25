@@ -80,6 +80,7 @@ const App = {
     `).join('');
 
     document.getElementById('app').innerHTML = `
+      <div class="sidebar-overlay" id="sidebar-overlay"></div>
       <nav id="sidebar">
         <div class="sidebar-header">
           <a href="/api/logout" class="sidebar-logo" style="text-decoration:none;color:inherit;cursor:pointer;" title="退出登录">
@@ -114,6 +115,7 @@ const App = {
       <div id="main">
         <header id="topbar">
           <div class="topbar-breadcrumb">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">☰</button>
             <span>PRWP</span>
             <span class="sep">/</span>
             <span class="current" id="topbar-current">Overview</span>
@@ -171,6 +173,20 @@ const App = {
     Store.onChange(() => {
       // Auto-refresh stats on dashboard if currently viewing it
       if (Router.getCurrent() === 'dashboard') Router.resolve();
+    });
+
+    // Mobile sidebar toggle
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+    }
+    if (overlay) {
+      overlay.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+    }
+    // Close sidebar on nav click (event delegation)
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.nav-item')) document.body.classList.remove('sidebar-open');
     });
   }
 };

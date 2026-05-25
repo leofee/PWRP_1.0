@@ -1,6 +1,8 @@
 services:
   pocketbase:
-    image: pocketbase/pocketbase
+    build:
+      context: ./pocketbase
+      dockerfile: Dockerfile
     container_name: pwrp-pocketbase
     ports:
       - "8090:8090"

@@ -8,6 +8,9 @@ export default defineConfig({
     port: 4321,
     host: "0.0.0.0",
   },
+  security: {
+    checkOrigin: false,
+  },
   devToolbar: {
     enabled: false,
   },

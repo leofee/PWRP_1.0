@@ -1,0 +1,27 @@
+services:
+  pocketbase:
+    image: pocketbase/pocketbase
+    container_name: pwrp-pocketbase
+    ports:
+      - "8090:8090"
+    volumes:
+      - pb_data:/pb_data
+      - ./pocketbase/pb_hooks:/pb_hooks
+      - ./pocketbase/pb_migrations:/pb_migrations
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pwrp-frontend
+    ports:
+      - "4321:4321"
+    environment:
+      - POCKETBASE_URL=http://pwrp-pocketbase:8090
+    depends_on:
+      - pocketbase
+    restart: unless-stopped
+
+volumes:
+  pb_data:

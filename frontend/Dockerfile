@@ -11,4 +11,4 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 EXPOSE 4321
-CMD ["npm", "run", "preview"]
+CMD ["node", "./dist/server/entry.mjs"]

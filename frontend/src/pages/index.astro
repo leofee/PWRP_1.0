@@ -2,87 +2,326 @@
 import Layout from "@/layouts/Layout.astro";
 
 const sessionCookie = Astro.cookies.get("session")?.value;
-let session: { username: string } | null = null;
+let isValidSession = false;
 if (sessionCookie) {
   try {
-    session = JSON.parse(sessionCookie);
+    let session = JSON.parse(sessionCookie);
+    if (typeof session === "string") {
+      session = JSON.parse(session);
+    }
+    if (session?.username) {
+      isValidSession = true;
+    }
   } catch {}
 }
-
-if (!session) {
+if (!isValidSession) {
   return Astro.redirect("/login");
 }
 ---
 
-<Layout title="PRWP — Precision Resistance Welding Platform">
-  <link slot="head" rel="stylesheet" href="/css/tokens.css">
-  <link slot="head" rel="stylesheet" href="/css/layout.css">
-  <link slot="head" rel="stylesheet" href="/css/components.css">
-  <link slot="head" rel="stylesheet" href="/css/admin.css">
-  <div id="app">
-    <div class="loading-screen">
-      <div class="loading-content">
-        <div class="loading-icon">⚡</div>
-        <div class="loading-title">PRWP</div>
-        <div class="loading-text">Loading Platform...</div>
+<Layout title="电阻焊基础知识 | 焊接自动化设计工具" page="home">
+  <div class="lecture-container">
+    <aside class="lecture-toc">
+      <div class="toc-title">讲座大纲</div>
+      <div class="toc-item active" data-section="sect-basics">
+        <span class="toc-num">01</span>
+        <span class="toc-name">电阻焊接基础原理</span>
       </div>
+      <div class="toc-item" data-section="sect-conditions">
+        <span class="toc-num">02</span>
+        <span class="toc-name">设定电阻焊接条件</span>
+      </div>
+      <div class="toc-item" data-section="sect-instability">
+        <span class="toc-num">03</span>
+        <span class="toc-name">不稳定性因素排查</span>
+      </div>
+      <div class="toc-item" data-section="sect-power">
+        <span class="toc-num">04</span>
+        <span class="toc-name">焊接电源原理与对比</span>
+      </div>
+    </aside>
+
+    <div class="lecture-viewport">
+      <section id="sect-basics" class="lecture-section active">
+        <div class="lecture-card">
+          <h2>1-1. 电阻焊接基本原理</h2>
+          <p>电阻焊接是<strong>利用焦耳热进行焊接</strong>的工艺。当焊接电源输出的大电流流过被焊工件及电极时，在接触面和母材自身产生的电热量使金属局部熔化，施加压力并冷却后结晶形成牢固的焊接接头（称为<strong>焊核</strong>）。</p>
+
+          <div class="lecture-alert info" style="margin-bottom:20px">
+            <div class="lecture-alert-title">⚡ 焦耳热核心控制公式</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:bold;margin:5px 0">Q = 0.24 × I² × R × t</div>
+            <div>其中：<strong>Q</strong> = 发热量 (cal)；<strong>I</strong> = 焊接电流 (A)；<strong>R</strong> = 焊接电阻 (Ω)；<strong>t</strong> = 通电时间 (sec)。</div>
+          </div>
+
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;margin-bottom:20px;font-size:0.8rem;color:var(--text-secondary)">
+            <span style="color:var(--accent-cyan);font-weight:bold;display:block;margin-bottom:6px">🔄 电阻焊的焊核形成四个核心阶段：</span>
+            ① <strong>机械加压</strong>：电极对叠放的工件施加压力，破坏表面氧化物层，建立初步接触面积。<br>
+            ② <strong>通电发热</strong>：大电流流过，在工件接触面产生的电阻热（焦耳热）使其迅速加热熔化。<br>
+            ③ <strong>焊核形成</strong>：液态金属混合，在压力维持下形成熔融的晶核。<br>
+            ④ <strong>断电结晶</strong>：电流切断，电极继续加压（锻造冷却），使液态焊核快速结晶固化，形成高强度机械接头。
+          </div>
+
+          <h3 style="font-size:0.9rem;margin-top:20px;color:var(--text-primary)">💻 焦耳热及焊核熔化动态计算模拟器</h3>
+          <div class="calculator-grid">
+            <div class="calc-inputs">
+              <div class="calc-group">
+                <div class="calc-label"><span>焊接电流 (I)</span><span><input type="number" id="calcCurrentNum" value="2.5" min="0.1" max="6.0" step="0.1"> <span class="calc-unit">kA</span></span></div>
+                <div class="calc-input-row"><input type="range" id="calcCurrentRange" min="100" max="6000" step="50" value="2500"></div>
+              </div>
+              <div class="calc-group">
+                <div class="calc-label"><span>焊接电阻 (R)</span><span><input type="number" id="calcResistanceNum" value="80" min="5" max="300" step="1"> <span class="calc-unit">μΩ</span></span></div>
+                <div class="calc-input-row"><input type="range" id="calcResistanceRange" min="5" max="300" step="5" value="80"></div>
+              </div>
+              <div class="calc-group">
+                <div class="calc-label"><span>通电时间 (t)</span><span><input type="number" id="calcTimeNum" value="15" min="1" max="100" step="1"> <span class="calc-unit">ms</span></span></div>
+                <div class="calc-input-row"><input type="range" id="calcTimeRange" min="1" max="100" step="1" value="15"></div>
+              </div>
+            </div>
+            <div class="calc-result-box">
+              <div class="calc-result-title">焦耳产热量计算 (Q)</div>
+              <div class="calc-result-val" id="calcResultVal">-- cal</div>
+              <svg class="weld-sim-svg" viewBox="0 0 180 80">
+                <defs>
+                  <radialGradient id="nuggetGlow" cx="50%" cy="50%" r="50%">
+                    <stop id="glowStart" offset="0%" stop-color="rgba(255,75,0,0)"></stop>
+                    <stop id="glowEnd" offset="100%" stop-color="rgba(255,180,0,0)"></stop>
+                  </radialGradient>
+                </defs>
+                <rect x="75" y="0" width="30" height="24" fill="#884433" rx="2"></rect>
+                <rect x="30" y="24" width="120" height="15" fill="#556677" rx="1"></rect>
+                <rect x="30" y="41" width="120" height="15" fill="#667788" rx="1"></rect>
+                <rect x="75" y="56" width="30" height="24" fill="#884433" rx="2"></rect>
+                <line x1="40" y1="40" x2="140" y2="40" stroke="#ffaa00" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"></line>
+                <circle id="simNugget" cx="90" cy="40" r="10" fill="transparent"></circle>
+              </svg>
+              <div style="font-size:0.65rem;color:var(--text-muted);margin-top:6px">焊核熔化程度模拟（红色范围代表过热/爆火风险）</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lecture-card">
+          <h2>1-2. 焊接接触电阻的物理构成 (R)</h2>
+          <p>在电阻焊接回路中，总电阻由以下几个部分组成。根据温度分布曲线，接头产热分布直接受这些电阻大小的影响：</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center;margin:15px 0">
+            <div>
+              <ul style="font-size:0.8rem;color:var(--text-secondary);padding-left:18px;line-height:1.8">
+                <li><strong>R₁、R₅</strong>：材料本身的内部电阻。</li>
+                <li><strong>R₂、R₄</strong>：电极与被焊工件之间的接触电阻。</li>
+                <li><strong>R₃</strong>：上、下被焊工件接触面之间的接触电阻（<strong>产热核心点</strong>）。</li>
+              </ul>
+              <p style="font-size:0.78rem;color:var(--accent-orange);margin-top:8px">💡 <strong>什么是接触电阻？</strong> 接触电阻由"表皮电阻"（工件表面的氧化薄层引起）和"集中电阻"（电极加压下电流流通截面引起的集中收缩电阻）共同构成。</p>
+            </div>
+            <div style="background:var(--bg-base);padding:12px;border:1px solid var(--border);border-radius:var(--radius-md);text-align:center">
+              <svg viewBox="0 0 200 120" style="width:100%;height:100px">
+                <text x="10" y="20" fill="var(--text-muted)" font-size="9">电极 1</text>
+                <rect x="80" y="5" width="40" height="20" fill="#a0522d" rx="2"></rect>
+                <text x="130" y="20" fill="#a0522d" font-size="10">R₁</text>
+                <line x1="100" y1="25" x2="100" y2="35" stroke="#ff8c00" stroke-width="2"></line>
+                <text x="115" y="33" fill="#ff8c00" font-size="10">R₂ (接触面)</text>
+                <rect x="60" y="35" width="80" height="15" fill="#778899" rx="1"></rect>
+                <text x="150" y="47" fill="#778899" font-size="10">母材 A</text>
+                <line x1="100" y1="50" x2="100" y2="60" stroke="#ff3300" stroke-width="2"></line>
+                <text x="115" y="58" fill="#ff3300" font-size="10">R₃ (焊接点)</text>
+                <rect x="60" y="60" width="80" height="15" fill="#8090a0" rx="1"></rect>
+                <text x="150" y="72" fill="#8090a0" font-size="10">母材 B</text>
+                <line x1="100" y1="75" x2="100" y2="85" stroke="#ff8c00" stroke-width="2"></line>
+                <text x="115" y="83" fill="#ff8c00" font-size="10">R₄ (接触面)</text>
+                <rect x="80" y="85" width="40" height="20" fill="#a0522d" rx="2"></rect>
+                <text x="130" y="100" fill="#a0522d" font-size="10">R₅</text>
+                <text x="10" y="105" fill="var(--text-muted)" font-size="9">电极 2</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="lecture-card">
+          <h2>1-3. 工件材质与推荐电极材质匹配速查表</h2>
+          <p>为了控制热量流失，并防止工件与电极发生合金化粘连，在电阻焊设计选型中，<strong>工件材质导热率越好，需要选配导热率相对较低、硬度更高的电极材质</strong>（如钨、钼等难熔金属），反之亦然。</p>
+          <div class="lecture-table-wrap">
+            <table class="lecture-table">
+              <thead><tr><th>被焊接工件材料</th><th>推荐选用的电极材料</th><th>物理逻辑与作用机制</th></tr></thead>
+              <tbody>
+                <tr><td><strong>软钢 (Mild Steel)</strong></td><td>铬铜合金 (Cr-Cu / Class 2)</td><td>软钢电阻较大，发热容易。铬铜具备高导电和良好的机械强度，成本低寿命长。</td></tr>
+                <tr><td><strong>铜 (Copper)</strong></td><td>钨、钼 (W, Mo) 或 钨铜合金 (W-Cu)</td><td>铜自身极易散热且电阻极小。必须使用熔点高、导热较差的难熔金属电极来聚集热量。</td></tr>
+                <tr><td><strong>黄铜 (Brass)</strong></td><td>铬铜合金 (Cr-Cu)</td><td>适中的导电率和硬度配合，铬铜能良好抑制粘附。</td></tr>
+                <tr><td><strong>不锈钢 (Stainless Steel)</strong></td><td>铬铜合金 (Cr-Cu)</td><td>不锈钢自身电阻率高，极易发热。常规铬铜可以提供优良的导电和冷却。</td></tr>
+                <tr><td><strong>银 (Silver)</strong></td><td>钨铜合金 (W-Cu)</td><td>银的电导率极高，需要高密度的热量聚集，钨铜兼顾硬度与散热平衡。</td></tr>
+                <tr><td><strong>铝 (Aluminum)</strong></td><td>钨、钼 (W, Mo)</td><td>铝的导电性极强且表面氧化膜复杂，钨、钼等硬电极可压碎氧化层并实现快速聚热。</td></tr>
+                <tr><td><strong>镍 (Nickel)</strong></td><td>超质铝铜 (Glidcop / Class 3)、铬铜合金</td><td>镍强度大。选用弥散强化铜（氧化铝铜）可以获得极高的软化温度，防止连焊。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="lecture-card">
+          <h2>1-4. 焊接热平衡控制 (Heat Balance)</h2>
+          <p><strong>焊接热平衡</strong>是指对两个焊接工件材料施以均等的热量。通过调整电极材料及电极前端接触截面，使焊接点界面温度达到最高，解决工件因物理性质不同造成的焊核偏斜问题。</p>
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-top:10px">
+            <h4 style="font-size:0.82rem;color:var(--text-primary);margin-bottom:8px">🔄 异种厚度/异种材质热平衡调节方法：</h4>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:0.78rem;color:var(--text-secondary);line-height:1.6">
+              <div><span style="color:var(--accent-cyan);font-weight:600;display:block;margin-bottom:4px">🛠️ 方法一：调整两侧电极材质</span>导热极快、极难焊接的一侧工件（如铝、铜）配备<strong>热导率低、熔点高</strong>的难熔金属电极（如钼 Mo、钨 W）以强行聚集热量。导热差一侧则使用高电导率的常规铬铜电极。</div>
+              <div><span style="color:var(--accent-cyan);font-weight:600;display:block;margin-bottom:4px">📐 方法二：调整电极接触面积</span>将较厚或散热快的一侧电极端面直径收窄，从而<strong>大幅提高该侧的电流密度 (I/S)</strong>，增加单位面积焦耳热。较易发热的一侧则使用较宽的端面来分散电流。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lecture-card">
+          <h2>1-5. 常见焊接物理接头方式种类与应用实例</h2>
+          <p>精密电阻焊接根据工件装配形式和通电路径，主要分为不同的电极摆放与搭接接头方式：</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:10px">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px">
+              <h4 style="font-size:0.82rem;color:var(--text-primary);margin-bottom:8px">📐 基础接头形式 (Joint Types)</h4>
+              <ul style="font-size:0.76rem;color:var(--text-secondary);padding-left:16px;line-height:1.8">
+                <li><strong style="color:var(--text-primary)">上下对碰方式 (Opposed Type)</strong>：最传统的双面夹持点焊，电极在工件两侧相对挤压。</li>
+                <li><strong style="color:var(--text-primary)">平行间接方式 (Indirect Type)</strong>：两个电极在工件的同一侧，由于基层导电不良，电流流经上部材质后返回。</li>
+                <li><strong style="color:var(--text-primary)">平行方式 (Series Type)</strong>：同侧双头串联点焊，典型应用于电池组的镍带连焊。</li>
+              </ul>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px">
+              <h4 style="font-size:0.82rem;color:var(--text-primary);margin-bottom:8px">⚙️ 自动化微电子典型应用</h4>
+              <ul style="font-size:0.76rem;color:var(--text-secondary);padding-left:16px;line-height:1.8">
+                <li><strong>多股铜线整理 (Compacting)</strong>：对散乱的多股电线端子施加瞬时高压与热量，直接整理焊接成坚实的矩形铜块。</li>
+                <li><strong>漆包线热熔焊 (Insulation Wire)</strong>：对漆包线与U型端子直接通电，利用电热爆破脱去漆皮同时与端子熔合。</li>
+                <li><strong>精密平行旋转封焊 (Seam Welding)</strong>：旋转电极对盖子与石英晶体或陶瓷基座进行高速滚焊，实现气密封装。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="sect-conditions" class="lecture-section">
+        <div class="lecture-card">
+          <h2>2-1. 精密电阻焊接系统的四大构成</h2>
+          <p>一个完整的精密点焊站通常由以下四大子系统协同工作完成：</p>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:15px 0">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px">
+              <div style="font-weight:600;color:var(--accent-blue);margin-bottom:5px">🔌 1. 焊接电源</div>
+              <div style="font-size:0.76rem;color:var(--text-secondary)">控制器核心。决定通电电流大小、通电时间长短以及电流输出的波形模式。</div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px">
+              <div style="font-weight:600;color:var(--accent-orange);margin-bottom:5px">⚡ 2. 焊接变压器</div>
+              <div style="font-size:0.76rem;color:var(--text-secondary)">将电网端或电源输出端输出的高压小电流转换为适合点焊所需的极高瞬时大电流。</div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px">
+              <div style="font-weight:600;color:var(--accent-green);margin-bottom:5px">🏋️ 3. 焊接机头</div>
+              <div style="font-size:0.76rem;color:var(--text-secondary)">压力施加与跟进机构。控制电极对工件的夹紧力以及在材料软化熔融时的瞬时机械跟进速度（追从性）。</div>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px">
+              <div style="font-weight:600;color:var(--accent-cyan);margin-bottom:5px">🔩 4. 焊接电极</div>
+              <div style="font-size:0.76rem;color:var(--text-secondary)">工艺终端载体。负责施加压力、传导超大电流以及在通电后期进行接头的热量导出（冷却热平衡）和锻造。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lecture-card">
+          <h2>2-2. 焊接品质的决定要素</h2>
+          <p>工程选型和工艺调试中，必须严格匹配和优化的三大核心支柱：</p>
+          <div style="background:var(--bg-base);padding:16px;border:1px solid var(--border);border-radius:var(--radius-md);font-size:0.8rem;color:var(--text-secondary);line-height:1.8">
+            <ol style="padding-left:18px">
+              <li><strong style="color:var(--text-primary)">电流密度 (I / S)</strong>：这是焊接良率的生命线。如果连续施焊中电极由于热磨损导致前端截面积变大，即使电流数值不变，电流密度下降也会引起焊核剧烈缩小。</li>
+              <li><strong style="color:var(--text-primary)">机头追从性 (Follow-up Ability)</strong>：大电流通电时间往往在几毫秒至十几毫秒，在此期间金属瞬间液化，若机头惯性大无法瞬间下压，极易产生气隙而导致爆火飞溅。</li>
+              <li><strong style="color:var(--text-primary)">温度与状态管理 (Maintenance)</strong>：持续焊接时，电极端面磨损与氧化直接影响接触电阻。必须引入合理的冷却（强制水冷/风冷）与定期端面修正（打磨或自动研磨修模）。</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section id="sect-instability" class="lecture-section">
+        <div class="lecture-card">
+          <h2>3-1. 造成精密电阻焊接不稳定的因素诊断</h2>
+          <p>当产线出现焊接强度低、炸火飞溅严重或焊后表面压痕太深等不良时，通常可从<strong>电源性能</strong>、<strong>机头刚性</strong>和<strong>电极状态</strong>三个维度诊断并执行针对性措施。</p>
+          <h3 style="font-size:0.9rem;margin-top:15px;color:var(--text-primary)">🔍 焊接异常排查诊断工具</h3>
+          <div class="trouble-panel">
+            <div class="trouble-selector">
+              <div class="trouble-option active" data-issue="splatter">💥 焊接爆火（飞溅严重）</div>
+              <div class="trouble-option" data-issue="unmelted">❄️ 焊接脱焊（焊核偏小）</div>
+              <div class="trouble-option" data-issue="sticking">🔗 电极粘工件（电极粘连）</div>
+              <div class="trouble-option" data-issue="irregular">📈 焊点强度不一致</div>
+            </div>
+            <div class="trouble-solution-box">
+              <div class="trouble-sol-section">
+                <div class="trouble-sol-header">🔌 焊接电源调整建议</div>
+                <div class="trouble-sol-body" id="solPower">焊接电流骤升过高，或使用了不可调斜率的电源（如低级电容储能电源）。应调整起升斜率（Up-slope）或降低电流幅值。</div>
+              </div>
+              <div style="height:1px;background:var(--border)"></div>
+              <div class="trouble-sol-section">
+                <div class="trouble-sol-header">🏋️ 焊接机头调整建议</div>
+                <div class="trouble-sol-body" id="solHead">加压力过小或机头的追从性能差。在极高的电热熔化瞬间，机头弹簧不能迅速跟进加压维持工件接触，导致接触电阻剧增而爆火。建议选用弹簧触发的快追从性机头。</div>
+              </div>
+              <div style="height:1px;background:var(--border)"></div>
+              <div class="trouble-sol-section">
+                <div class="trouble-sol-header">🔩 焊接电极管理建议</div>
+                <div class="trouble-sol-body" id="solElectrode">电极表面被烧蚀或粘附氧化层，导致电极与工件间的接触电阻（R2/R4）过大。必须对电极端面实施定期的状态管理（打磨、更换）。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="sect-power" class="lecture-section">
+        <div class="lecture-card">
+          <h2>4-1. 五大电阻焊接电源电流波形比较</h2>
+          <p>不同的电源输出波形，决定了其热量的释放速度与精密控制的级别：</p>
+          <div class="waveform-component">
+            <div class="waveform-tabs">
+              <button class="waveform-tab active" data-wave="ac">AC 交流</button>
+              <button class="waveform-tab" data-wave="capacitor">电容储能 (CD)</button>
+              <button class="waveform-tab" data-wave="transistor">晶体管式</button>
+              <button class="waveform-tab" data-wave="highfreq">高频逆变</button>
+              <button class="waveform-tab" data-wave="hybrid">混合式</button>
+            </div>
+            <div class="waveform-display-grid">
+              <div class="waveform-svg-container">
+                <svg viewBox="0 0 450 200" style="width:100%;height:160px;background:#0b0f15">
+                  <line x1="30" y1="120" x2="430" y2="120" stroke="var(--border)" stroke-width="1"></line>
+                  <line x1="30" y1="10" x2="30" y2="190" stroke="var(--border)" stroke-width="1"></line>
+                  <text x="410" y="115" fill="var(--text-muted)" font-size="9">时间(t)</text>
+                  <text x="35" y="25" fill="var(--text-muted)" font-size="9" writing-mode="vertical-rl">焊接电流(I)</text>
+                  <path id="wavePath" d="M 30,120 Q 80,30 130,120 T 230,120 Q 280,210 330,120 T 430,120" fill="none" stroke="var(--accent-cyan)" stroke-width="2.5" stroke-linecap="round"></path>
+                </svg>
+              </div>
+              <div class="waveform-info-card">
+                <div class="waveform-info-title" id="waveTitle">交流式 (AC) 焊接电源</div>
+                <div class="waveform-pros-cons"><div><span class="waveform-tag pro">特长/优点</span></div><div id="wavePros" style="color:var(--text-secondary)">构造简单，普及率最高，操作维护容易，价格低廉。</div></div>
+                <div class="waveform-pros-cons"><div><span class="waveform-tag con">限制/缺点</span></div><div id="waveCons" style="color:var(--text-secondary)">热效率一般，存在过零点，热影响区（HAZ）大，不适合精密或超细线焊接。</div></div>
+                <div class="waveform-pros-cons" style="font-size:0.76rem;border-top:1px solid var(--border);padding-top:8px">
+                  <div style="color:var(--text-muted);font-weight:500">典型集成应用案例：</div>
+                  <div id="waveCases" style="color:var(--text-primary)">铁制工件、防盗网、钢丝网、厚壁软钢等要求不高的大型部件焊接。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lecture-card">
+          <h2>4-2. 各类焊接电源决策对比矩阵 (Decision Matrix)</h2>
+          <p>来自 AVIO 课件第 36 页的权威对比，供您在焊接自动化项目的设备选型中参考决策：</p>
+          <div class="lecture-table-wrap">
+            <table class="lecture-table" style="font-size:0.72rem">
+              <thead>
+                <tr><th>评估指标维度</th><th style="text-align:center">传统交流 (AC)</th><th style="text-align:center">电容储能 (CD)</th><th style="text-align:center">高频逆变式 (HF)</th><th style="text-align:center">高精密晶体管</th><th style="text-align:center">极性切换混合式</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>价格优势 (成本低)</strong></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge good">◯</span></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge good">◯</span></td></tr>
+                <tr><td><strong>热发热效率</strong></td><td style="text-align:center"><span class="rating-badge good">◯</span></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge good">◯</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td></tr>
+                <tr><td><strong>工作生产节拍 (速度)</strong></td><td style="text-align:center"><span class="rating-badge good">◯</span></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td></tr>
+                <tr><td><strong>电网电压变动稳定性</strong></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td></tr>
+                <tr><td><strong>防止飞溅 (起升控制)</strong></td><td style="text-align:center"><span class="rating-badge good">◯</span></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td></tr>
+                <tr><td><strong>防止表面烧坏与压痕</strong></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge good">◯</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td></tr>
+                <tr><td><strong>应对硬接触等不稳工况</strong></td><td style="text-align:center"><span class="rating-badge good">◯</span></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td></tr>
+                <tr><td><strong>适合极细线和金属箔片</strong></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge good">◯</span></td><td style="text-align:center"><span class="rating-badge good">◯</span></td></tr>
+                <tr><td><strong>适合铜、铝等高导电金属</strong></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td></tr>
+                <tr><td><strong>极性效应调谐 (焊核均匀)</strong></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge poor">△</span></td><td style="text-align:center"><span class="rating-badge good">◯</span></td><td style="text-align:center"><span class="rating-badge excel">◎</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="font-size:0.65rem;color:var(--text-muted);display:flex;justify-content:flex-end;gap:12px;margin-top:5px">
+            <span>◎: 非常好 (优秀/极佳)</span><span>◯: 好 (适用/良好)</span><span>△: 稍微不好 (限用/偏弱)</span>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 
-  <script is:inline src="/js/data/platform.js"></script>
-  <script is:inline src="/js/data/materials.js"></script>
-  <script is:inline src="/js/data/interfaces.js"></script>
-  <script is:inline src="/js/data/failures.js"></script>
-  <script is:inline src="/js/data/templates.js"></script>
-
-  <script is:inline src="/js/i18n.js"></script>
-  <script is:inline src="/js/router.js"></script>
-  <script is:inline src="/js/store.js"></script>
-  <script is:inline src="/js/ai.js"></script>
-  <script is:inline src="/js/ui.js"></script>
-
-  <script is:inline src="/js/pages/dashboard.js"></script>
-  <script is:inline src="/js/pages/material.js"></script>
-  <script is:inline src="/js/pages/interface.js"></script>
-  <script is:inline src="/js/pages/failure.js"></script>
-  <script is:inline src="/js/pages/process.js"></script>
-  <script is:inline src="/js/pages/knowledge-chain.js"></script>
-  <script is:inline src="/js/pages/placeholder.js"></script>
-  <script is:inline src="/js/pages/admin.js"></script>
-
-  <script is:inline src="/js/app.js"></script>
+  <script is:inline src="/js/lecture.js"></script>
 </Layout>
-
-<style>
-  .loading-screen {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    color: #6E6E73;
-    font-size: 15px;
-    background: #F5F5F7;
-  }
-
-  .loading-content {
-    text-align: center;
-  }
-
-  .loading-icon {
-    font-size: 36px;
-    margin-bottom: 16px;
-  }
-
-  .loading-title {
-    font-weight: 700;
-    color: #1D1D1F;
-    font-size: 22px;
-    margin-bottom: 8px;
-  }
-
-  .loading-text {
-    font-size: 15px;
-    color: #6E6E73;
-  }
-</style>

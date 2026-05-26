@@ -2,13 +2,20 @@
 import WeldingIllustration from "@/components/WeldingIllustration.astro";
 
 const sessionCookie = Astro.cookies.get("session")?.value;
+let shouldRedirect = false;
 if (sessionCookie) {
   try {
-    const session = JSON.parse(sessionCookie);
+    let session = JSON.parse(sessionCookie);
+    if (typeof session === "string") {
+      session = JSON.parse(session);
+    }
     if (session?.username) {
-      return Astro.redirect("/");
+      shouldRedirect = true;
     }
   } catch {}
+}
+if (shouldRedirect) {
+  return Astro.redirect("/");
 }
 ---
 
@@ -92,7 +99,6 @@ if (sessionCookie) {
     background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0d1f3c 100%);
   }
 
-  /* ========== Left: Illustration ========== */
   .illustration-section {
     flex: 0 0 58%;
     position: relative;
@@ -137,7 +143,6 @@ if (sessionCookie) {
     letter-spacing: 6px;
   }
 
-  /* ========== Right: Form ========== */
   .form-section {
     flex: 0 0 42%;
     display: flex;
@@ -340,7 +345,6 @@ if (sessionCookie) {
     text-decoration: underline;
   }
 
-  /* ========== Footer ========== */
   .footer {
     position: fixed;
     bottom: 20px;
@@ -351,21 +355,11 @@ if (sessionCookie) {
     color: rgba(255, 255, 255, 0.25);
   }
 
-  /* ========== Responsive ========== */
   @media (max-width: 900px) {
-    .illustration-section {
-      display: none;
-    }
-    .form-section {
-      flex: 1;
-    }
-    .form-section::before {
-      display: none;
-    }
-    .login-card {
-      width: 340px;
-      padding: 32px 24px;
-    }
+    .illustration-section { display: none; }
+    .form-section { flex: 1; }
+    .form-section::before { display: none; }
+    .login-card { width: 340px; padding: 32px 24px; }
   }
 </style>
 
@@ -381,6 +375,4 @@ if (sessionCookie) {
         : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
     });
   }
-
-
 </script>

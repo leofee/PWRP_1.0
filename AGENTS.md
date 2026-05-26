@@ -1,4 +1,4 @@
-# AGENTS.md — demo02
+# AGENTS.md
 
 ## Architecture
 Three independent services wired via `POCKETBASE_URL`:
@@ -11,11 +11,12 @@ Three independent services wired via `POCKETBASE_URL`:
 
 ## Key facts
 - PocketBase binary + `pb_data/` are gitignored — download manually from pocketbase.io
-- Astro uses SSR mode (`output: "server"` in `astro.config.mjs`)
-- `frontend/src/lib/pocketbase.ts` wraps PocketBase SDK as a singleton; reads `POCKETBASE_URL` env var (default `http://127.0.0.1:8090`)
+- Astro SSR mode (`output: "server"` in `astro.config.mjs`)
 - `@/*` path alias maps to `frontend/src/*` (configured in `tsconfig.json`)
+- Frontend pages: `index.astro` (基础知识, `/`), `electrode.astro` (电极库, `/electrode`), `login.astro` (无 Layout 独立页面)
+- Layout (`Layout.astro`) has sticky topbar + sidebar nav with `page` prop for active state
+- Electrode data in `public/js/electrodes.js`, persisted via `localStorage`
 - Python loads `.env` via `python-dotenv`; `.env` is gitignored
-- No test/lint/typecheck scripts configured yet
 
 ## Service order
 PocketBase must be running before Astro or Python attempt to connect.

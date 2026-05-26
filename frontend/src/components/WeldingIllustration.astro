@@ -22,17 +22,14 @@
     </filter>
   </defs>
 
-  <!-- Decorative circles -->
   <circle cx="120" cy="80" r="100" fill="none" stroke="rgba(64,169,255,0.08)" stroke-width="2"/>
   <circle cx="140" cy="100" r="60" fill="none" stroke="rgba(64,169,255,0.12)" stroke-width="1.5"/>
   <circle cx="480" cy="350" r="80" fill="none" stroke="rgba(64,169,255,0.06)" stroke-width="1.5"/>
 
-  <!-- Grid lines -->
   <line x1="50" y1="380" x2="550" y2="380" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
   <line x1="50" y1="350" x2="550" y2="350" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
   <line x1="50" y1="320" x2="550" y2="320" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
 
-  <!-- Data bars -->
   <g>
     <rect x="100" y="280" width="28" height="100" rx="4" fill="url(#barGrad)">
       <animate attributeName="height" values="100;120;90;100" dur="3s" repeatCount="indefinite"/>
@@ -56,11 +53,9 @@
     </rect>
   </g>
 
-  <!-- Robot arm base -->
   <rect x="350" y="360" width="60" height="20" rx="4" fill="#1e3a6a"/>
   <rect x="365" y="340" width="30" height="25" rx="3" fill="#2a4a8a"/>
 
-  <!-- Robot arm segments -->
   <g>
     <line x1="380" y1="340" x2="380" y2="260" stroke="#40a9ff" stroke-width="8" stroke-linecap="round">
       <animate attributeName="y2" values="260;240;280;260" dur="4s" repeatCount="indefinite"/>
@@ -71,7 +66,6 @@
     </line>
   </g>
 
-  <!-- Joint circles -->
   <circle cx="380" cy="340" r="6" fill="#60d0ff" filter="url(#glow)"/>
   <circle cx="380" cy="260" r="5" fill="#60d0ff" filter="url(#glow)">
     <animate attributeName="cy" values="260;240;280;260" dur="4s" repeatCount="indefinite"/>
@@ -81,14 +75,12 @@
     <animate attributeName="cy" values="200;180;220;200" dur="4s" repeatCount="indefinite"/>
   </circle>
 
-  <!-- Welding torch head -->
   <g>
     <animateTransform attributeName="transform" type="translate" values="0,0;20,-20;-20,20;0,0" dur="4s" repeatCount="indefinite"/>
     <line x1="440" y1="200" x2="475" y2="185" stroke="#888" stroke-width="4" stroke-linecap="round"/>
     <rect x="470" y="175" width="14" height="20" rx="3" fill="#555" transform="rotate(-20,477,185)"/>
   </g>
 
-  <!-- Welding sparks -->
   <g filter="url(#glowStrong)">
     <circle cx="485" cy="190" r="3" fill="#ffd700">
       <animate attributeName="opacity" values="1;0.2;1" dur="0.6s" repeatCount="indefinite"/>
@@ -114,16 +106,13 @@
     </circle>
   </g>
 
-  <!-- Spark arc flash -->
   <path d="M480,188 Q490,175 485,192" fill="none" stroke="#ffd700" stroke-width="1.5" opacity="0.6">
     <animate attributeName="opacity" values="0.6;0;0.6" dur="0.3s" repeatCount="indefinite"/>
   </path>
 
-  <!-- Welding workpiece (metal plates) -->
   <rect x="460" y="200" width="60" height="6" rx="1" fill="#667"/>
   <rect x="470" y="206" width="50" height="6" rx="1" fill="#556"/>
 
-  <!-- Connection nodes (network) -->
   <g>
     <circle cx="80" cy="200" r="5" fill="#40a9ff" filter="url(#glow)">
       <animate attributeName="r" values="5;7;5" dur="2s" repeatCount="indefinite"/>
@@ -138,7 +127,6 @@
   <line x1="160" y1="160" x2="200" y2="220" stroke="rgba(64,169,255,0.15)" stroke-width="1"/>
   <line x1="200" y1="220" x2="100" y2="270" stroke="rgba(64,169,255,0.1)" stroke-width="1"/>
 
-  <!-- Floating data dots -->
   <circle cx="500" cy="100" r="2" fill="rgba(64,169,255,0.4)">
     <animate attributeName="opacity" values="0.4;0.1;0.4" dur="2s" repeatCount="indefinite"/>
   </circle>
@@ -149,7 +137,6 @@
     <animate attributeName="opacity" values="0.35;0.05;0.35" dur="1.8s" repeatCount="indefinite"/>
   </circle>
 
-  <!-- Data flow path (dashed) -->
   <path d="M70,200 Q300,100 480,190" fill="none" stroke="rgba(64,169,255,0.08)" stroke-width="1.5" stroke-dasharray="4,6">
     <animate attributeName="stroke-dashoffset" values="0;-30" dur="2s" repeatCount="indefinite"/>
   </path>

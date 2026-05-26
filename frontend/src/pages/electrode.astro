@@ -1,0 +1,164 @@
+---
+import Layout from "@/layouts/Layout.astro";
+
+const sessionCookie = Astro.cookies.get("session")?.value;
+let isValidSession = false;
+if (sessionCookie) {
+  try {
+    let session = JSON.parse(sessionCookie);
+    if (typeof session === "string") {
+      session = JSON.parse(session);
+    }
+    if (session?.username) {
+      isValidSession = true;
+    }
+  } catch {}
+}
+if (!isValidSession) {
+  return Astro.redirect("/login");
+}
+---
+
+<Layout title="电极材料选型库 | 焊接自动化设计工具" page="electrode">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        <span class="page-title-dot" style="--dot:#3a7bd5"></span>
+        电极库
+        <span class="page-title-count">共 <em id="totalCount">—</em> 种</span>
+      </h1>
+      <p class="page-desc">焊接电极材料选型参考 · 支持按材质类别、导电率、适用工件筛选</p>
+    </div>
+    <button class="add-btn" id="addBtn" onclick="openAddModal()">
+      <span class="add-btn-icon">＋</span> 添加材料
+    </button>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-bar-row">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input id="searchInput" type="text" placeholder="搜索材质、成分、特点…" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="filter-pill-group" id="categoryFilters"></div>
+      <div class="sort-group">
+        <span class="sort-label">排序</span>
+        <button class="sort-btn active" data-sort="default">默认</button>
+        <button class="sort-btn" data-sort="cond-desc">导电↓</button>
+        <button class="sort-btn" data-sort="cond-asc">导电↑</button>
+        <button class="sort-btn" data-sort="temp-desc">耐温↓</button>
+      </div>
+    </div>
+
+    <div class="filter-bar-row filter-bar-row--tags">
+      <div class="filter-tag-section">
+        <span class="filter-tag-label">导电率</span>
+        <div class="filter-pill-group" id="condFilters"></div>
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-tag-section filter-tag-section--flex">
+        <span class="filter-tag-label">工件</span>
+        <div class="tag-group" id="workpieceTags"></div>
+      </div>
+      <button class="reset-btn" onclick="resetFilters()" title="重置筛选">↺ 重置</button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="result-count" id="resultCount">—</div>
+  </div>
+
+  <div class="card-grid" id="cardGrid"></div>
+
+  <div class="modal-overlay" id="detailOverlay">
+    <div class="modal" id="detailContent"></div>
+  </div>
+
+  <div class="modal-overlay" id="addOverlay">
+    <div class="modal modal--form" id="addModal">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-name" id="addModalTitle">添加新材料</div>
+          <div class="modal-formula" id="addModalDesc" style="color:var(--text-muted)">填写电极材料基本信息</div>
+        </div>
+        <button class="modal-close" onclick="closeAddModal()">✕</button>
+      </div>
+
+      <form id="addForm" onsubmit="submitAddForm(event)">
+        <div class="form-grid">
+          <div class="form-group form-group--half">
+            <label class="form-label">材质名称 <span class="required">*</span></label>
+            <input class="form-input" id="f-name" type="text" placeholder="如：铬铜" required>
+          </div>
+          <div class="form-group form-group--half">
+            <label class="form-label">别名／型号</label>
+            <input class="form-input" id="f-nameAlt" type="text" placeholder="如：AL-60">
+          </div>
+          <div class="form-group form-group--half">
+            <label class="form-label">主要成分 <span class="required">*</span></label>
+            <input class="form-input" id="f-formula" type="text" placeholder="如：CuCr、Cu·Be" required>
+          </div>
+          <div class="form-group form-group--half">
+            <label class="form-label">材质类别 <span class="required">*</span></label>
+            <select class="form-input form-select" id="f-category" required>
+              <option value="">请选择</option>
+              <option value="铜合金">铜合金系</option>
+              <option value="难熔金属">难熔金属系</option>
+              <option value="铜难熔复合">铜难熔复合系</option>
+            </select>
+          </div>
+          <div class="form-group form-group--third">
+            <label class="form-label">导电率（% IACS）</label>
+            <input class="form-input" id="f-conductivity" type="number" min="0" max="110" step="0.1" placeholder="如：80">
+            <span class="form-hint">留空表示未知</span>
+          </div>
+          <div class="form-group form-group--third">
+            <label class="form-label">导电率显示文本</label>
+            <input class="form-input" id="f-condDisplay" type="text" placeholder="如：≥80% IACS">
+            <span class="form-hint">留空则自动生成</span>
+          </div>
+          <div class="form-group form-group--third">
+            <label class="form-label">软化温度（°C）</label>
+            <input class="form-input" id="f-temp" type="number" min="0" placeholder="如：550">
+            <span class="form-hint">留空表示未知</span>
+          </div>
+          <div class="form-group form-group--half">
+            <label class="form-label">软化温度显示文本</label>
+            <input class="form-input" id="f-tempDisplay" type="text" placeholder="如：550°C、≥550°C">
+            <span class="form-hint">留空则自动生成</span>
+          </div>
+          <div class="form-group form-group--half">
+            <label class="form-label">硬度</label>
+            <input class="form-input" id="f-hardness" type="text" placeholder="如：HRB 84、HB 175">
+          </div>
+          <div class="form-group">
+            <label class="form-label">常用牌号</label>
+            <input class="form-input" id="f-grades" type="text" placeholder="多个牌号用逗号分隔，如：C15715, C15740">
+          </div>
+          <div class="form-group">
+            <label class="form-label">适用工件材质（用于筛选）</label>
+            <input class="form-input" id="f-suitableFor" type="text" placeholder="用逗号分隔，如：不锈钢, 镀锌钢板, 铜合金">
+            <span class="form-hint">这些标签会出现在筛选栏中</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">适用工件详细说明</label>
+            <textarea class="form-input form-textarea" id="f-suitableDisplay" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">材料特点</label>
+            <textarea class="form-input form-textarea" id="f-features" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="form-btn form-btn--cancel" onclick="closeAddModal()">取消</button>
+          <button type="submit" class="form-btn form-btn--submit" id="addSubmitBtn">保存材料</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script is:inline src="/js/electrodes.js"></script>
+  <script is:inline src="/js/app.js"></script>
+</Layout>

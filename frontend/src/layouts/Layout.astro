@@ -1,19 +1,158 @@
 ---
 export interface Props {
   title: string;
+  page?: string;
 }
-const { title } = Astro.props;
+const { title, page } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/style.css">
+    {page === "home" && <link rel="stylesheet" href="/css/lecture.css">}
     <slot name="head" />
   </head>
   <body>
-    <slot />
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle" aria-label="切换菜单">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topbar-brand">
+          <div class="topbar-logo">&#x26A1;</div>
+          <div>
+            <span class="topbar-title">精密电阻焊接知识平台</span>
+            <span class="topbar-subtitle">Precision Resistance Welding Knowledge Platform</span>
+          </div>
+        </div>
+      </div>
+      <a href="/api/logout" class="logout-btn" title="退出登录">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>退出登录</span>
+      </a>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="layout">
+      <nav class="nav-sidebar" id="navSidebar">
+        <div class="nav-section-label">核心库</div>
+        <ul class="nav-list">
+          <li class="nav-item{page === 'home' ? ' active' : ''}">
+            <a href={page === 'home' ? undefined : "/"} class="nav-link">
+              <span class="nav-icon" style="color:#e05252">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              </span>
+              <span class="nav-num">01</span>
+              <span class="nav-name">基础知识</span>
+            </a>
+          </li>
+          <li class="nav-item nav-item--dev" data-dev="true">
+            <span class="nav-icon" style="color:#d97a1a">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            </span>
+            <span class="nav-num">02</span>
+            <span class="nav-name">界面库</span>
+            <span class="nav-dev-badge">Dev</span>
+          </li>
+          <li class="nav-item nav-item--dev" data-dev="true">
+            <span class="nav-icon" style="color:#e6a817">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+            </span>
+            <span class="nav-num">03</span>
+            <span class="nav-name">工艺模板</span>
+            <span class="nav-dev-badge">Dev</span>
+          </li>
+          <li class="nav-item nav-item--dev" data-dev="true">
+            <span class="nav-icon" style="color:#2ea043">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </span>
+            <span class="nav-num">04</span>
+            <span class="nav-name">电源库</span>
+            <span class="nav-dev-badge">Dev</span>
+          </li>
+          <li class="nav-item nav-item--dev" data-dev="true">
+            <span class="nav-icon" style="color:#29ced4">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </span>
+            <span class="nav-num">05</span>
+            <span class="nav-name">机构库</span>
+            <span class="nav-dev-badge">Dev</span>
+          </li>
+          <li class="nav-item{page === 'electrode' ? ' active' : ''}">
+            <a href={page === 'electrode' ? undefined : "/electrode"} class="nav-link">
+              <span class="nav-icon" style="color:#3a7bd5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="1"/><path d="M9 13L12 19L15 13"/><line x1="5" y1="21" x2="19" y2="21"/><line x1="7" y1="18" x2="9.5" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="17" y1="18" x2="14.5" y2="21"/></svg>
+              </span>
+              <span class="nav-num">06</span>
+              <span class="nav-name">电极库</span>
+            </a>
+          </li>
+          <li class="nav-item nav-item--dev" data-dev="true">
+            <span class="nav-icon" style="color:#e0529a">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </span>
+            <span class="nav-num">07</span>
+            <span class="nav-name">传感闭环</span>
+            <span class="nav-dev-badge">Dev</span>
+          </li>
+          <li class="nav-item nav-item--dev" data-dev="true">
+            <span class="nav-icon" style="color:#8b5cf6">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </span>
+            <span class="nav-num">08</span>
+            <span class="nav-name">波形库</span>
+            <span class="nav-dev-badge">Dev</span>
+          </li>
+          <li class="nav-item nav-item--dev" data-dev="true">
+            <span class="nav-icon" style="color:#e05252">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </span>
+            <span class="nav-num">09</span>
+            <span class="nav-name">失效库</span>
+            <span class="nav-dev-badge">Dev</span>
+          </li>
+        </ul>
+      </nav>
+
+      <main class="main">
+        <slot />
+      </main>
+    </div>
+
+    <script is:inline>
+      const menuToggle = document.getElementById('menuToggle');
+      const navSidebar = document.getElementById('navSidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+      if (menuToggle && navSidebar && sidebarOverlay) {
+        const toggleMenu = () => {
+          navSidebar.classList.toggle('active');
+          sidebarOverlay.classList.toggle('active');
+          menuToggle.classList.toggle('active');
+          document.body.style.overflow = navSidebar.classList.contains('active') ? 'hidden' : '';
+        };
+
+        const closeMenu = () => {
+          navSidebar.classList.remove('active');
+          sidebarOverlay.classList.remove('active');
+          menuToggle.classList.remove('active');
+          document.body.style.overflow = '';
+        };
+
+        menuToggle.addEventListener('click', toggleMenu);
+        sidebarOverlay.addEventListener('click', closeMenu);
+
+        // Close sidebar on link click
+        navSidebar.querySelectorAll('.nav-link').forEach(link => {
+          link.addEventListener('click', closeMenu);
+        });
+      }
+    </script>
   </body>
 </html>
